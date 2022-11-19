@@ -92,6 +92,7 @@ module.exports = function (app) {
       
       const _id = body._id;
       delete body._id;
+      body.updated_on = new Date();
       Issue.findOneAndUpdate(
         { _id: _id },
         body,
