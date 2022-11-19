@@ -4,6 +4,7 @@ const assert = chai.assert;
 const server = require('../server');
 
 chai.use(chaiHttp);
+let test_id;
 
 suite('Functional Tests', function() {
   this.timeout(5000);
@@ -31,6 +32,7 @@ suite('Functional Tests', function() {
                 assert.property(res.body, "_id");
                 assert.property(res.body, "created_on");
                 assert.property(res.body, "updated_on");
+                test_id = res.body._id;
                 done();
             });
     });
@@ -119,14 +121,14 @@ suite('Functional Tests', function() {
             .request(server)
             .put("/api/issues/functional_test")
             .send({
-                _id: "6377f446b5fb9d8c875ce695",
+                _id: test_id,
                 open: false
             })
             .end((err, res) => {
                 assert.equal(res.status, 200);
                 assert.equal(res.type, "application/json");
                 assert.equal(res.body.result, "successfully updated");
-                assert.equal(res.body._id, "6377f446b5fb9d8c875ce695");
+                assert.equal(res.body._id, test_id);
                 done();
             });
     });
@@ -135,7 +137,7 @@ suite('Functional Tests', function() {
             .request(server)
             .put("/api/issues/functional_test")
             .send({
-                _id: "6377f446b5fb9d8c875ce695",
+                _id: test_id,
                 status_text: "done",
                 assigned_to: "nobody"
             })
@@ -143,7 +145,7 @@ suite('Functional Tests', function() {
                 assert.equal(res.status, 200);
                 assert.equal(res.type, "application/json");
                 assert.equal(res.body.result, "successfully updated");
-                assert.equal(res.body._id, "6377f446b5fb9d8c875ce695");
+                assert.equal(res.body._id, test_id);
                 done();
             });
     });
@@ -166,13 +168,13 @@ suite('Functional Tests', function() {
             .request(server)
             .put("/api/issues/functional_test")
             .send({
-                _id: "6377f446b5fb9d8c875ce695",
+                _id: test_id,
             })
             .end((err, res) => {
                 assert.equal(res.status, 200);
                 assert.equal(res.type, "application/json");
                 assert.equal(res.body.error, "no update field(s) sent");
-                assert.equal(res.body._id, "6377f446b5fb9d8c875ce695");
+                assert.equal(res.body._id, test_id);
                 done();
             });
     });
@@ -199,13 +201,13 @@ suite('Functional Tests', function() {
             .request(server)
             .delete("/api/issues/functional_test")
             .send({
-                _id: "*" // * should be valid _id
+                _id: test_id
             })
             .end((err, res) => {
                 assert.equal(res.status, 200);
                 assert.equal(res.type, "application/json");
                 assert.equal(res.body.result, "successfully deleted");
-                assert.equal(res.body._id, "*"); // * should be valid _id
+                assert.equal(res.body._id, test_id);
                 done();
             });
     });
