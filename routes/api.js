@@ -12,9 +12,9 @@ const issueSchema = new Schema({
   created_on: Date,
   updated_on: Date,
   created_by: { type: String, required: true },
-  assigned_to: String,
+  assigned_to: {type: String, default: ""},
   open: { type: Boolean, default: true },
-  status_text: String
+  status_text: {type: String, default: ""}
 }, { versionKey: false });
 
 const projectSchema = new Schema({
@@ -46,22 +46,20 @@ module.exports = function (app) {
     })
     
     .post(function (req, res){
-      if (req.body.issue_title === "" || req.body.issue_text === ""
-      || req.body.created_by === "") {
+      if (typeof req.body.issue_title === "undefined" || typeof req.body.issue_text === "undefined"
+      || typeof req.body.created_by === "undefined" || req.body.issue_title === ""
+      || req.body.issue_text === "" || req.body.created_by === ""
+      || req.body.issue_title === null || req.body.issue_text === null
+      || req.body.created_by === null) {
         return res.send({ error: "required field(s) missing" });      
       }
 
       let project = req.params.project;
+      const body = Object.assign({}, req.body);
+      body.created_on = new Date();
+      body.updated_on = new Date();
 
-      const issue = new Issue({
-        issue_title: req.body.issue_title,
-        issue_text: req.body.issue_text,
-        created_on: new Date(),
-        updated_on: new Date(),
-        created_by: req.body.created_by,
-        assigned_to: req.body.assigned_to,
-        status_text: req.body.status_text
-      });
+      const issue = new Issue(body);
 
       issue.save(err => {
         if (err) return res.send(err);
@@ -80,7 +78,7 @@ module.exports = function (app) {
     })
     
     .put(function (req, res){
-      if (req.body._id === "" || req.body._id === null) return res.send({ error: "missing _id"});
+      if (typeof req.body._id === "undefined" || req.body._id === "" || req.body._id === null) return res.send({ error: "missing _id"});
       
       const body = Object.assign({}, req.body);
       const keys = Object.keys(body);
@@ -107,7 +105,7 @@ module.exports = function (app) {
     })
     
     .delete(function (req, res){
-      if (req.body._id === "" || req.body._id === null) return res.send({ error: "missing _id"});
+      if (typeof req.body._id === "undefined" || req.body._id === "" || req.body._id === null) return res.send({ error: "missing _id"});
 
       Issue.findByIdAndRemove(req.body._id, (err, removedIssue) => {
         if (err || removedIssue === null) return res.send({ error: "could not delete", _id: req.body._id });
